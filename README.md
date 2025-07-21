@@ -1,4 +1,4 @@
-# 🎵 Song Management App (Frontend)
+# 🎵 Song Management App (Frontend)  and  Backend
 
 This is a React-based frontend application to manage songs — allowing users to create, view, update, and delete songs with metadata, album art, and audio files. It connects to a REST API backend and uses Redux Toolkit with Redux-Saga for global state management.
 
