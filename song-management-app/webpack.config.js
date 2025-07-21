@@ -3,9 +3,10 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const dotenv = require('dotenv');
 
-// Load environment variables from .env
+// Load environment variables from .env file
 const env = dotenv.config().parsed || {};
 
+// Convert environment variables into DefinePlugin format
 const envKeys = Object.keys(env).reduce((prev, next) => {
   prev[`process.env.${next}`] = JSON.stringify(env[next]);
   return prev;
@@ -17,32 +18,39 @@ module.exports = {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.[contenthash].js',
     clean: true,
-    publicPath: '/',
+    publicPath: '/', // Needed for React Router
   },
-  mode: 'development', // change to 'production' when deploying
+  mode: 'development', // or 'production'
   resolve: {
     extensions: ['.js', '.jsx'],
+    alias: {
+      process: 'process/browser.js', // ✅ Fixes Redux Toolkit & Axios error
+    },
   },
   devtool: 'source-map',
   module: {
     rules: [
-      // JS/JSX files → Babel
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
         use: 'babel-loader',
       },
-      // CSS (Optional: if you’re using Emotion, you may skip this)
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
       },
-      // Images & SVGs → Custom rule
       {
         test: /\.(png|jpe?g|gif|svg)$/i,
         type: 'asset/resource',
         generator: {
           filename: 'images/[hash][ext][query]',
+        },
+      },
+      {
+        test: /\.(mp3|wav|ogg)$/i,
+        type: 'asset/resource',
+        generator: {
+          filename: 'audio/[hash][ext][query]',
         },
       },
     ],
@@ -51,7 +59,10 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: './public/index.html',
     }),
-    new webpack.DefinePlugin(envKeys),
+    new webpack.DefinePlugin(envKeys), // ✅ Inject environment variables
+    new webpack.ProvidePlugin({
+      process: 'process/browser.js', // ✅ Important for axios & Redux Toolkit
+    }),
   ],
   devServer: {
     static: {
